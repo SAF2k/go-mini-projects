@@ -20,15 +20,15 @@ export default function HomePage() {
     }
   };
 
-   const getUserDetails = async () => {
-     const response = await axios.get("http://127.0.0.1:8000/api/user");
-      console.log(response.data.data.username);
-     setData(response.data.data.username);
-   };
+  //  const getUserDetails = async () => {
+  //    const response = await axios.get("http://127.0.0.1:8000/api/user");
+  //     console.log(response.data.data.username);
+  //    setData(response.data.data.username);
+  //  };
 
-   useEffect(() => {
-     getUserDetails();
-   }, []);
+  //  useEffect(() => {
+  //    getUserDetails();
+  //  }, []);
 
 
   return (
