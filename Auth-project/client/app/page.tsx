@@ -1,5 +1,3 @@
-export default function Home() {
-  return (
-   <h1>hello</h1>
-  )
+export default function Home(props: { name?: string }) {
+  return <div>{props.name ? "Hi " + props.name : "You are not logged in"}</div>;
 }
