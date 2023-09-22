@@ -1,13 +1,22 @@
 package main
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"auth/database"
+	"auth/routes"
+
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
+)
 
 func main() {
+	database.Connect()
 	app := fiber.New()
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World 👋!")
-	})
+	app.Use(cors.New(cors.Config{
+		AllowCredentials: true,
+	}))
+
+	routes.Setup(app)
 
 	app.Listen(":8000")
 }
