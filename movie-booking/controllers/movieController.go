@@ -1,108 +1,107 @@
-// movie_controller.go
-
 package controllers
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 )
 
-type Movie struct {
-	ID    int    `json:"id"`
-	Title string `json:"title"`
-	Year  int    `json:"year"`
+// Director represents the director of a movie.
+type Director struct {
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
 }
 
-var movies []Movie
+// Movie represents a movie with an ID, title, year, and director.
+type Movie struct {
+	ID       int      `json:"id"`
+	Title    string   `json:"title"`
+	Year     int      `json:"year"`
+	Director Director `json:"director"`
+}
+
+var movies []Movie // Slice for storing movies
+
+// respondWithError writes an error response with the given status code and message.
+func respondWithError(w http.ResponseWriter, statusCode int, message string) {
+	w.WriteHeader(statusCode)
+	fmt.Fprintf(w, message)
+}
+
+// writeJSONResponse writes a JSON response with the given data and status code.
+func writeJSONResponse(w http.ResponseWriter, statusCode int, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	json.NewEncoder(w).Encode(data)
+}
 
 // GetMovies retrieves all movies.
 func GetMovies(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(movies)
+	writeJSONResponse(w, http.StatusOK, movies)
 }
 
 // GetMovie retrieves a single movie by ID.
 func GetMovie(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id := vars["id"]
-
-	// Find the movie with the given ID and return it
-	for _, movie := range movies {
-		if fmt.Sprintf("%d", movie.ID) == id {
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(movie)
-			return
-		}
+	idStr := vars["id"]
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id < 0 || id >= len(movies) {
+		respondWithError(w, http.StatusNotFound, "Movie not found")
+		return
 	}
 
-	// If movie not found, return a 404 error
-	w.WriteHeader(http.StatusNotFound)
-	fmt.Fprintf(w, "Movie not found")
+	writeJSONResponse(w, http.StatusOK, movies[id])
 }
 
 // CreateMovie creates a new movie.
 func CreateMovie(w http.ResponseWriter, r *http.Request) {
 	var newMovie Movie
 	if err := json.NewDecoder(r.Body).Decode(&newMovie); err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		respondWithError(w, http.StatusBadRequest, "Invalid request format")
 		return
 	}
 
-	// Assign a unique ID and add the new movie to the slice
-	newMovie.ID = len(movies) + 1
 	movies = append(movies, newMovie)
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(newMovie)
+	writeJSONResponse(w, http.StatusCreated, newMovie)
 }
 
 // UpdateMovie updates an existing movie by ID.
 func UpdateMovie(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id := vars["id"]
-
-	// Find the movie with the given ID
-	for i, movie := range movies {
-		if fmt.Sprintf("%d", movie.ID) == id {
-			var updatedMovie Movie
-			if err := json.NewDecoder(r.Body).Decode(&updatedMovie); err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-
-			// Update the movie's information
-			updatedMovie.ID = movie.ID
-			movies[i] = updatedMovie
-
-			w.Header().Set("Content-Type", "application/json")
-			json.NewEncoder(w).Encode(updatedMovie)
-			return
-		}
+	idStr := vars["id"]
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id < 0 || id >= len(movies) {
+		respondWithError(w, http.StatusNotFound, "Movie not found")
+		return
 	}
 
-	// If movie not found, return a 404 error
-	w.WriteHeader(http.StatusNotFound)
-	fmt.Fprintf(w, "Movie not found")
+	var updatedMovie Movie
+	if err := json.NewDecoder(r.Body).Decode(&updatedMovie); err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid request format")
+		return
+	}
+
+	movies[id] = updatedMovie
+
+	writeJSONResponse(w, http.StatusOK, updatedMovie)
 }
 
 // DeleteMovie deletes a movie by ID.
 func DeleteMovie(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id := vars["id"]
-
-	// Find the movie with the given ID and delete it
-	for i, movie := range movies {
-		if fmt.Sprintf("%d", movie.ID) == id {
-			movies = append(movies[:i], movies[i+1:]...)
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
+	idStr := vars["id"]
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id < 0 || id >= len(movies) {
+		respondWithError(w, http.StatusNotFound, "Movie not found")
+		return
 	}
 
-	// If movie not found, return a 404 error
-	w.WriteHeader(http.StatusNotFound)
-	fmt.Fprintf(w, "Movie not found")
+	movies = append(movies[:id], movies[id+1:]...)
+
+	w.WriteHeader(http.StatusNoContent)
 }
