@@ -6,28 +6,21 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/rs/cors"
 )
 
 func main() {
 	r := mux.NewRouter()
-	r.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			// Set CORS headers
-			w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
-			if r.Method == "OPTIONS" {
-				w.WriteHeader(http.StatusOK)
-				return
-			}
+	// Define your CORS options
+	c := cors.AllowAll()
 
-			next.ServeHTTP(w, r)
-		})
-	})
+	// Wrap your router with CORS middleware
+	handler := c.Handler(r)
 
+	// Register your routes
 	routes.RegisterBookStoreRoutes(r)
-	http.Handle("/", r)
-	log.Fatal(http.ListenAndServe(":8080", r))
 
+	// Start the server with the CORS-wrapped handler
+	log.Fatal(http.ListenAndServe(":8080", handler))
 }

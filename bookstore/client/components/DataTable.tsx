@@ -10,7 +10,9 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
-import getBooks from "@/actions/get-book";
+import { getBooks } from "@/actions/get-book";
+import { Button } from "./ui/button";
+import DeleteBook from "./DeleteBook";
 
 export interface Book {
   ID: number;
@@ -52,23 +54,31 @@ export default function DataTable() {
             <TableHead>Name</TableHead>
             <TableHead>Author</TableHead>
             <TableHead>Publication</TableHead>
+            <TableHead>Update</TableHead>
+            <TableHead>Delete</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={4}>Loading...</TableCell>
+          {loading ? (
+            <TableRow>
+              <TableCell colSpan={4}>Loading...</TableCell>
+            </TableRow>
+          ) : (
+            data.map((book, index) => (
+              <TableRow key={index}>
+                <TableCell>#{book.ID}</TableCell>
+                <TableCell>{book.name}</TableCell>
+                <TableCell>{book.author}</TableCell>
+                <TableCell>{book.publication}</TableCell>
+                <TableCell>
+                  <Button>Update</Button>
+                </TableCell>
+                <TableCell>
+                  <DeleteBook id={book.ID}/>
+                </TableCell>
               </TableRow>
-            ) : (
-              data.map((book, index) => (
-                <TableRow key={index}>
-                  <TableCell>#{book.ID}</TableCell>
-                  <TableCell>{book.name}</TableCell>
-                  <TableCell>{book.author}</TableCell>
-                  <TableCell>{book.publication}</TableCell>
-                </TableRow>
-              ))
-            )}
+            ))
+          )}
         </TableBody>
       </Table>
     </div>
