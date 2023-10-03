@@ -29,7 +29,15 @@ func GetBookById(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("error while parsing")
 	}
 	bookDetails, _ := models.GetBookById(ID)
+	if bookDetails.ID == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("ID: " + bookId + " not found"))
+		return
+	}
 	res, _ := json.Marshal(bookDetails)
+	if res == nil {
+		fmt.Println("error while marshalling")
+	}
 	w.Header().Set("Content-Type", "pkglication/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
@@ -47,12 +55,16 @@ func CreateBook(w http.ResponseWriter, r *http.Request) {
 func DeleteBook(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	bookId := vars["bookId"]
-	fmt.Println(bookId)
 	ID, err := strconv.ParseInt(bookId, 0, 0)
 	if err != nil {
 		fmt.Println("error while parsing")
 	}
 	book := models.DeleteBook(ID)
+	if book.ID == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("ID: " + bookId + " not found"))
+		return
+	}
 	res, _ := json.Marshal(book)
 	w.Header().Set("Content-Type", "pkglication/json")
 	w.WriteHeader(http.StatusOK)
@@ -68,7 +80,12 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Println("error while parsing")
 	}
-	bookDetails, db := models.GetBookById(ID)
+	bookDetails, _ := models.GetBookById(ID)
+	if bookDetails.ID == 0 {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("ID: " + bookId + " not found"))
+		return
+	}
 	if updateBook.Name != "" {
 		bookDetails.Name = updateBook.Name
 	}
@@ -78,8 +95,8 @@ func UpdateBook(w http.ResponseWriter, r *http.Request) {
 	if updateBook.Publication != "" {
 		bookDetails.Publication = updateBook.Publication
 	}
-	db.Save(&bookDetails)
-	res, _ := json.Marshal(bookDetails)
+	book := models.UpdateBook(ID, *bookDetails)
+	res, _ := json.Marshal(book)
 	w.Header().Set("Content-Type", "pkglication/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write(res)
