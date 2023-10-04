@@ -13,6 +13,7 @@ import {
 import { getBooks } from "@/actions/get-book";
 import { Button } from "./ui/button";
 import DeleteBook from "./DeleteBook";
+import UpdateBook from "./UpdateBook";
 
 export interface Book {
   ID: number;
@@ -45,12 +46,11 @@ export default function DataTable() {
   }, []);
 
   return (
-    <div className="mt-10 mx-14 border rounded-xl">
+    <div className="my-10 mx-14 border rounded-xl">
       <Table>
-        <TableCaption>A list of your recent invoices.</TableCaption>
         <TableHeader>
           <TableRow>
-            <TableHead className="w-[100px]">Invoice</TableHead>
+            <TableHead className="w-[100px]">Books</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Author</TableHead>
             <TableHead>Publication</TableHead>
@@ -71,7 +71,12 @@ export default function DataTable() {
                 <TableCell>{book.author}</TableCell>
                 <TableCell>{book.publication}</TableCell>
                 <TableCell>
-                  <Button>Update</Button>
+                  <UpdateBook
+                    name={book.name}
+                    author={book.author}
+                    publication={book.publication}
+                    id={book.ID}
+                  />
                 </TableCell>
                 <TableCell>
                   <DeleteBook id={book.ID}/>

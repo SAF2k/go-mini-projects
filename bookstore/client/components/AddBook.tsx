@@ -79,7 +79,7 @@ export default function AddBook() {
               <Button variant="outline">
                 <DialogClose>Cancel</DialogClose>
               </Button>
-              <Button type="submit">Add</Button>
+              <Button type="submit">Deploy</Button>
             </CardFooter>
           </form>
         </Card>

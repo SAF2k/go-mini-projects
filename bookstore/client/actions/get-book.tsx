@@ -24,4 +24,11 @@ const deleteBook = async (id: number) => {
   return res.data
 }
 
-export { postBook, getBooks, deleteBook }
+const updateBook = async (id: number, data: InputProps) => {
+  const res: AxiosResponse<Book> = await axios.patch(
+    `http://localhost:8080/books/${id}`, data
+  );
+  return res.data
+}
+
+export { postBook, getBooks, deleteBook, updateBook }
